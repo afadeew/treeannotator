@@ -1,20 +1,39 @@
-import sys
 import os
 import dendropy
-from Bio import SeqIO
 import argparse
+from Bio import SeqIO
+
+#Читаем параметры командной строки
+descriptionText = "Produces phylogenetic trees annotated with aminoacid substitutions"
+parser = argparse.ArgumentParser(description = descriptionText,formatter_class=argparse.RawDescriptionHelpFormatter)
+parser.add_argument("-fasta", dest="aln", required=True, help="Path to alignment FASTA file")
+parser.add_argument("-engine", dest="engine", required=False, help="Phylogenetic tree building engine (raxml, raxml-ng or iqtree)", default="raxml")
+parser.add_argument("-raxml", dest="raxml", required=False, help="Path to RaXML executable", default="raxmlHPC")
+parser.add_argument("-fasttree", dest="fasttree", required=False, help="Path to FastTree executable", default="FastTreeMP")
+parser.add_argument("-raxml-ng", dest="raxmlng", required=False, help="Path to RaXML-NG executable", default="raxml-ng")
+parser.add_argument("-iqtree", dest="iqtree", required=False, help="Path to IQtree executable", default="iqtree")
+parser.add_argument("-orfs", dest="orfs", required=False, help="Path to file with open reading frames' coordinates", default="0")
+args = parser.parse_args()
 
 #Пути к исполняемым файлам
-RAXML_PATH = "raxmlHPC"
-FASTTREE_PATH = "FastTreeMP"
-RAXMLNG_PATH = "raxml-ng"
-IQTREE_PATH = "iqtree"
+RAXML_PATH = args.raxml
+FASTTREE_PATH = args.fasttree
+RAXMLNG_PATH = args.raxmlng
+IQTREE_PATH = args.iqtree
+if not os.path.isfile(args.raxml):
+    print("Warning! RaXML executable not found")
+if not os.path.isfile(args.fasttree):
+    print("Warning! FastTree executable not found")
+if not os.path.isfile(args.raxmlng):
+    print("Warning! RaXML-NG executable not found")
+if not os.path.isfile(args.iqtree):
+    print("Warning! IQtree executable not found")
 
 #Читаем входное выравнивание, выбрасываем дублирующиеся по названию последовательности
 seqs = []
 seq_names = {}
 print("Open input sequence file")
-for seq_record in SeqIO.parse(sys.argv[1], 'fasta'):
+for seq_record in SeqIO.parse(args.aln, 'fasta'):
 	tmp_str = seq_record.id.upper()
 	if tmp_str not in seq_names.keys():
 		seq_names[tmp_str] = 1
@@ -27,10 +46,11 @@ print('Total used: '+str(len(seqs))+' sequences')
 
 #Строим дерево, выбираем метод в зависимости от числа последовательностей
 if len(seqs) <= 500:
-	print("We have less than 500 sequences.\nStarting RAxML tree search using GTRGAMMA model and 1000 fast bootstrap replications\n\n")
-	os.system(RAXML_PATH+" -f a -m GTRGAMMA -p 12345 -x 12345 -# 1000 -n topol -T "+str(os.cpu_count())+" -s aln.fas -o "+seqs[0].id)
-	tree_name = "RAxML_bipartitions.topol"
-	print("RAxML tree search finished\n\n---------------------------------------------------\n\n")
+    if args.engine == 'raxml':
+        print("We have less than 500 sequences.\nStarting RAxML tree search using GTRGAMMA model and 1000 fast bootstrap replications\n\n")
+        os.system(RAXML_PATH+" -f a -m GTRGAMMA -p 12345 -x 12345 -# 1000 -n topol -T "+str(os.cpu_count())+" -s aln.fas -o "+seqs[0].id)
+        tree_name = "RAxML_bipartitions.topol"
+        print("RAxML tree search finished\n\n---------------------------------------------------\n\n")
 elif len(seqs) > 500 and len(seqs) <= 1000:
 	print("We have more than 500 sequences and less than 1000 sequences.\nStarting RAxML tree search using GTRGAMMA model and 10 tree search attempts without bootstrap\n\n")
 	os.system(RAXML_PATH+" -m GTRGAMMA -p 12345 -# 10 -n topol -T "+str(os.cpu_count())+" -s aln.fas -o "+seqs[0].id)
