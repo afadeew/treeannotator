@@ -6,6 +6,7 @@ from Bio import SeqIO
 #Читаем параметры командной строки
 descriptionText = "Produces phylogenetic trees annotated with aminoacid substitutions"
 parser = argparse.ArgumentParser(description = descriptionText,formatter_class=argparse.RawDescriptionHelpFormatter)
+
 parser.add_argument("-fasta", dest="aln", required=True, help="Path to alignment FASTA file")
 parser.add_argument("-engine", dest="engine", required=False, help="Phylogenetic tree building engine (raxml, raxml-ng or iqtree)", default="raxml")
 parser.add_argument("-raxml", dest="raxml", required=False, help="Path to RaXML executable", default="raxmlHPC")
@@ -13,6 +14,8 @@ parser.add_argument("-fasttree", dest="fasttree", required=False, help="Path to 
 parser.add_argument("-raxml-ng", dest="raxmlng", required=False, help="Path to RaXML-NG executable", default="raxml-ng")
 parser.add_argument("-iqtree", dest="iqtree", required=False, help="Path to IQtree executable", default="iqtree")
 parser.add_argument("-orfs", dest="orfs", required=False, help="Path to file with open reading frames' coordinates", default="0")
+parser.add_argument("-root", dest="root", required=False, help="Waynto root the tree (firstseq or midpoint)",default="firstseq")
+
 args = parser.parse_args()
 
 #Пути к исполняемым файлам
