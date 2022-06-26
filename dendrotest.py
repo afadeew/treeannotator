@@ -2,11 +2,13 @@ import sys
 import os
 import dendropy
 from Bio import SeqIO
+import argparse
 
 #Пути к исполняемым файлам
 RAXML_PATH = "raxmlHPC"
 FASTTREE_PATH = "FastTreeMP"
 RAXMLNG_PATH = "raxml-ng"
+IQTREE_PATH = "iqtree"
 
 #Читаем входное выравнивание, выбрасываем дублирующиеся по названию последовательности
 seqs = []
